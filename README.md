@@ -31,6 +31,17 @@ python manage.py runserver
 
 The backend runs on http://127.0.0.1:8000/
 
+## Loading the question bank
+
+From the `backend` folder, with the virtual environment active:
+
+```powershell
+python manage.py migrate
+python manage.py loaddata questions/question_bank.json
+```
+
+This loads 6 categories, 12 choice questions (48 answer options) and 12 numeric questions.
+
 ## Running the frontend (Windows PowerShell)
 
 In a second terminal:

@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 
 
@@ -24,7 +25,16 @@ class BaseQuestion(models.Model):
 
 
 class ChoiceQuestion(BaseQuestion):
-    pass
+    def validate_answer_options(self, options=None):
+        if options is None:
+            options = list(self.answeroption_set.all())
+
+        if len(options) != 4:
+            raise ValidationError("A choice question must have exactly 4 answer options.")
+
+        correct_count = sum(1 for option in options if option.is_correct)
+        if correct_count != 1:
+            raise ValidationError("A choice question must have exactly 1 correct answer.")
 
 
 class NumericQuestion(BaseQuestion):

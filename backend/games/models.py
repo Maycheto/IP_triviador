@@ -55,3 +55,37 @@ class Player(models.Model):
 
     def __str__(self):
         return f"{self.user} in game {self.game_id} ({self.color})"
+
+
+class Round(models.Model):
+    TYPE_CHOICES = [
+        ("city_capture", "City capture"),
+        ("battle", "Battle"),
+        ("capital_attack", "Capital attack"),
+        ("bonus", "Bonus"),
+    ]
+
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("active", "Active"),
+        ("completed", "Completed"),
+    ]
+
+    game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name="rounds")
+    number = models.PositiveIntegerField()
+    type = models.CharField(max_length=20, choices=TYPE_CHOICES)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+    winner = models.ForeignKey(Player, null=True, blank=True, on_delete=models.SET_NULL)
+    created_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["game", "number"],
+                name="unique_round_number_per_game",
+            ),
+        ]
+
+    def __str__(self):
+        return f"Round {self.number} of game {self.game_id} ({self.type})"

@@ -2,6 +2,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -23,8 +24,7 @@ class RegisterView(APIView):
 
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response({"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
         user = serializer.save()
         return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
 
@@ -43,14 +43,11 @@ class LoginView(APIView):
         if not password:
             errors["password"] = ["This field is required."]
         if errors:
-            return Response({"errors": errors}, status=status.HTTP_400_BAD_REQUEST)
+            raise ValidationError(errors)
 
         user = authenticate(request, username=username, password=password)
         if user is None:
-            return Response(
-                {"errors": {"non_field_errors": ["Invalid username or password."]}},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            raise ValidationError({"non_field_errors": ["Invalid username or password."]})
 
         login(request, user)
         return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
@@ -72,7 +69,6 @@ class MeView(APIView):
 
     def patch(self, request):
         serializer = ProfileUpdateSerializer(request.user.profile, data=request.data, partial=True)
-        if not serializer.is_valid():
-            return Response({"errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(UserSerializer(request.user).data, status=status.HTTP_200_OK)

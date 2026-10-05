@@ -1,8 +1,8 @@
 const AVATAR_COLORS = {
-  'knight-1': '#c62828',
-  'knight-2': '#1565c0',
-  'knight-3': '#2e7d32',
-  'knight-4': '#f9a825',
+  'knight-1': '#c75b7a',
+  'knight-2': '#6b3a6e',
+  'knight-3': '#5f7d5a',
+  'knight-4': '#b8893f',
 }
 
 function Avatar({ avatarKey, size = 64 }) {

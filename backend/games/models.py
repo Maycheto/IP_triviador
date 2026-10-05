@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 
 
@@ -23,6 +24,24 @@ class Game(models.Model):
 
     def is_completed(self):
         return self.status == "completed"
+
+    def start(self):
+        if self.status != "waiting":
+            raise ValidationError("Only a waiting game can be started.")
+        if self.players.count() != 3:
+            raise ValidationError("A game can be started only with exactly 3 players.")
+
+        self.status = "active"
+        self.full_clean()
+        self.save()
+
+    def complete(self):
+        if self.status != "active":
+            raise ValidationError("Only an active game can be completed.")
+
+        self.status = "completed"
+        self.full_clean()
+        self.save()
 
 
 class Player(models.Model):
@@ -55,6 +74,15 @@ class Player(models.Model):
 
     def __str__(self):
         return f"{self.user} in game {self.game_id} ({self.color})"
+
+    def clean(self):
+        if self.game_id is None or not self._state.adding:
+            return
+
+        if self.game.status != "waiting":
+            raise ValidationError("Players can only be added while the game is waiting.")
+        if self.game.players.count() >= 3:
+            raise ValidationError("A game cannot have more than 3 players.")
 
 
 class Round(models.Model):

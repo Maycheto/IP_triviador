@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'accounts',
     'questions',
     'games',
+    'lobby',
 ]
 
 MIDDLEWARE = [
